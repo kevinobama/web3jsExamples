@@ -1,0 +1,40 @@
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/web3.min.js"></script>
+<script type="text/javascript" src="/js/truffle-contract.min.js"></script>
+
+<script language="JavaScript">
+    var contractAddress="0x55A5819d4f929d5eaD62FdB886a14CB31A21F314";
+    var contractAddressLocal="0x535B0529F789DFb498daebdB56Aabb5d54F16eF8";
+    if (typeof web3 !== 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+        var web3Provider = web3.currentProvider;
+    } else {
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+    }
+    web3.eth.defaultAccount = web3.eth.accounts[0];
+
+    //web3.eth.contract
+    $.getJSON("/build/contracts/SimpleCollectible.json", function(simpleCollectible) {
+        var SimpleCollectibleContract = web3.eth.contract(simpleCollectible);
+        var simpleCollectible = SimpleCollectibleContract.at(contractAddressLocal);
+        console.log("web3:"+simpleCollectible);
+
+        simpleCollectible.methods.name().call().then(console.log);
+    });
+
+    //TruffleContract
+    $.getJSON("/build/contracts/SimpleCollectible.json", function(simpleCollectible) {
+        var simpleCollectibleContract = TruffleContract(simpleCollectible);
+        simpleCollectibleContract.setProvider(web3Provider);
+
+        simpleCollectibleContract.at(contractAddressLocal).then(function(simpleCollectible) {
+            return simpleCollectible;
+        }).then(function(simpleCollectible) {
+            console.log("Contract Address:", simpleCollectible.address);
+            return simpleCollectible.name();
+        }).then(function (name) {
+            console.log("name:", name);
+        });
+    });
+</script>
+web3js
